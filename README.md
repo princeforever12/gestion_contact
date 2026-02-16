@@ -11,13 +11,13 @@ Un mini-projet propre, clair et **présentable à l'oral**, basé exactement sur
 
 ## 🎯 Objectifs pédagogiques
 
-Ce projet montre que tu sais :
+Ce projet montre que ont sais :
 
 1. manipuler un dictionnaire Python,
 2. stocker des données structurées avec des tuples,
 3. découper ton code en fonctions réutilisables,
 4. valider des entrées utilisateur,
-5. tester automatiquement ton code.
+5. tester automatiquement le code.
 
 ---
 
@@ -86,7 +86,7 @@ Les tests vérifient :
 
 ## 🗣️ Idée de présentation (pour impressionner le prof)
 
-Tu peux dire :
+ont peux dire :
 
 > "J'ai respecté la consigne de base avec un dictionnaire de tuples, puis j'ai amélioré la robustesse : validation des données, fonctions claires, tri des contacts et tests automatisés. Le code est modulaire et prêt à évoluer (sauvegarde fichier, interface graphique, etc.)."
 
