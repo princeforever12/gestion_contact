@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import csv
 import json
+import shutil
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -164,30 +165,53 @@ def charger_depuis_csv(chemin: str) -> AddressBook:
     return carnet
 
 
+def _draw_panel(title: str, lines: List[str]) -> str:
+    width = min(max(shutil.get_terminal_size(fallback=(90, 24)).columns, 70), 110)
+    inner_width = width - 4
+    top = f"┌{'─' * (width - 2)}┐"
+    bottom = f"└{'─' * (width - 2)}┘"
+    title_line = f"│ {title[:inner_width].ljust(inner_width)} │"
+    body = [f"│ {line[:inner_width].ljust(inner_width)} │" for line in lines]
+    return "\n".join([top, title_line, f"├{'─' * (width - 2)}┤", *body, bottom])
+
+
 def _menu() -> str:
-    return (
-        "\nCarnet d'adresses - Menu\n"
-        "1) Ajouter un contact\n"
-        "2) Ajouter un numéro à un contact\n"
-        "3) Supprimer un contact\n"
-        "4) Rechercher un contact (nom exact)\n"
-        "5) Rechercher des contacts par préfixe\n"
-        "6) Afficher tous les contacts\n"
-        "7) Sauvegarder en JSON\n"
-        "8) Sauvegarder en CSV\n"
-        "9) Charger depuis JSON\n"
-        "10) Charger depuis CSV\n"
-        "11) Quitter\n"
-        "Votre choix: "
-    )
+    menu_lines = [
+        "1) 👤 Ajouter un contact",
+        "2) ☎️  Ajouter un numéro à un contact",
+        "3) 🗑️  Supprimer un contact",
+        "4) 🔎 Rechercher un contact (nom exact)",
+        "5) 🔍 Rechercher des contacts par préfixe",
+        "6) 📋 Afficher tous les contacts",
+        "7) 💾 Sauvegarder en JSON",
+        "8) 🧾 Sauvegarder en CSV",
+        "9) 📂 Charger depuis JSON",
+        "10) 📂 Charger depuis CSV",
+        "11) 🚪 Quitter",
+    ]
+    return _draw_panel("Carnet d'adresses - Menu principal", menu_lines)
+
+
+def _print_info(message: str) -> None:
+    print(_draw_panel("Information", [message]))
 
 
 def executer_application() -> None:
     carnet: AddressBook = {}
-    print("Bienvenue dans ton carnet d'adresses ✨")
+    print(
+        _draw_panel(
+            "Bienvenue ✨",
+            [
+                "Application Carnet d'adresses",
+                "Astuce: lance gui_tkinter.py pour une interface graphique moderne.",
+            ],
+        )
+    )
 
     while True:
-        choix = input(_menu()).strip()
+        print()
+        print(_menu())
+        choix = input("\n👉 Votre choix: ").strip()
 
         try:
             if choix == "1":
@@ -195,71 +219,71 @@ def executer_application() -> None:
                 telephones = [p.strip() for p in input("Téléphones (séparés par ','): ").split(",") if p.strip()]
                 email = input("Email: ")
                 if ajouter_contact(carnet, nom, telephones, email):
-                    print("✅ Contact ajouté.")
+                    _print_info("✅ Contact ajouté.")
                 else:
-                    print("⚠️ Un contact avec ce nom existe déjà.")
+                    _print_info("⚠️ Un contact avec ce nom existe déjà.")
 
             elif choix == "2":
                 nom = input("Nom du contact: ")
                 numero = input("Nouveau numéro: ")
                 if ajouter_numero(carnet, nom, numero):
-                    print("✅ Numéro ajouté.")
+                    _print_info("✅ Numéro ajouté.")
                 else:
-                    print("⚠️ Contact introuvable ou numéro déjà présent.")
+                    _print_info("⚠️ Contact introuvable ou numéro déjà présent.")
 
             elif choix == "3":
                 nom = input("Nom à supprimer: ")
-                print("✅ Contact supprimé." if supprimer_contact(carnet, nom) else "⚠️ Contact introuvable.")
+                _print_info("✅ Contact supprimé." if supprimer_contact(carnet, nom) else "⚠️ Contact introuvable.")
 
             elif choix == "4":
                 nom = input("Nom à rechercher: ")
                 contact = rechercher_contact(carnet, nom)
                 if contact is None:
-                    print("⚠️ Contact introuvable.")
+                    _print_info("⚠️ Contact introuvable.")
                 else:
                     telephones, email = contact
-                    print(f"✅ {nom.strip()} -> 📞 {', '.join(telephones)} | ✉️ {email}")
+                    _print_info(f"✅ {nom.strip()} -> 📞 {', '.join(telephones)} | ✉️ {email}")
 
             elif choix == "5":
                 prefixe = input("Début du nom: ")
                 resultats = rechercher_par_prefixe(carnet, prefixe)
                 if not resultats:
-                    print("⚠️ Aucun résultat.")
+                    _print_info("⚠️ Aucun résultat.")
                 else:
-                    print(afficher_tous_les_contacts(resultats))
+                    print(_draw_panel("Résultats de recherche", afficher_tous_les_contacts(resultats).splitlines()))
 
             elif choix == "6":
-                print(afficher_tous_les_contacts(carnet))
+                print(_draw_panel("Tous les contacts", afficher_tous_les_contacts(carnet).splitlines()))
 
             elif choix == "7":
                 chemin = input("Chemin JSON [contacts.json]: ").strip() or "contacts.json"
                 sauvegarder_en_json(carnet, chemin)
-                print(f"✅ Sauvegardé dans {chemin}")
+                _print_info(f"✅ Sauvegardé dans {chemin}")
 
             elif choix == "8":
                 chemin = input("Chemin CSV [contacts.csv]: ").strip() or "contacts.csv"
                 sauvegarder_en_csv(carnet, chemin)
-                print(f"✅ Sauvegardé dans {chemin}")
+                _print_info(f"✅ Sauvegardé dans {chemin}")
 
             elif choix == "9":
                 chemin = input("Chemin JSON [contacts.json]: ").strip() or "contacts.json"
                 carnet = charger_depuis_json(chemin)
-                print(f"✅ {len(carnet)} contact(s) chargé(s).")
+                _print_info(f"✅ {len(carnet)} contact(s) chargé(s).")
 
             elif choix == "10":
                 chemin = input("Chemin CSV [contacts.csv]: ").strip() or "contacts.csv"
                 carnet = charger_depuis_csv(chemin)
-                print(f"✅ {len(carnet)} contact(s) chargé(s).")
+                _print_info(f"✅ {len(carnet)} contact(s) chargé(s).")
 
             elif choix == "11":
-                print("Au revoir 👋")
+                _print_info("Au revoir 👋")
                 break
 
             else:
-                print("Choix invalide. Essaie encore.")
+                _print_info("Choix invalide. Essaie encore.")
 
         except (ValueError, KeyError) as error:
-            print(f"❌ Erreur: {error}")
+            _print_info(f"❌ Erreur: {error}")
 
 
 if __name__ == "__main__":
