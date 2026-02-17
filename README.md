@@ -124,6 +124,9 @@ python3 gui_tkinter.py
 ```
 
 Nouvelle interface visuelle :
+- thème moderne (palette plus élégante, boutons plus lisibles)
+- formulaire d'ajout qui apparaît en popup (pas affiché en permanence)
+- numéros saisis séparés par espace (ex: `0611223344 0788990011`)
 - thème moderne (couleurs, typographie plus lisible)
 - tableau de contacts avec colonnes (nom, téléphones, email)
 - sélection directe dans la liste pour supprimer/ajouter un numéro

@@ -216,7 +216,7 @@ def executer_application() -> None:
         try:
             if choix == "1":
                 nom = input("Nom: ")
-                telephones = [p.strip() for p in input("Téléphones (séparés par ','): ").split(",") if p.strip()]
+                telephones = [p.strip() for p in input("Téléphones (séparés par espace): ").split() if p.strip()]
                 email = input("Email: ")
                 if ajouter_contact(carnet, nom, telephones, email):
                     _print_info("✅ Contact ajouté.")
@@ -238,7 +238,6 @@ def executer_application() -> None:
                     _print_info("Suppression annulée.")
                 else:
                     _print_info("✅ Contact supprimé." if supprimer_contact(carnet, nom) else "⚠️ Contact introuvable.")
-                _print_info("✅ Contact supprimé." if supprimer_contact(carnet, nom) else "⚠️ Contact introuvable.")
 
             elif choix == "4":
                 nom = input("Nom à rechercher: ")

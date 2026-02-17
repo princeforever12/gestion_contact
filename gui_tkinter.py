@@ -22,8 +22,8 @@ class CarnetApp:
     def __init__(self, root: tk.Tk) -> None:
         self.root = root
         self.root.title("Carnet d'adresses • Interface moderne")
-        self.root.geometry("980x620")
-        self.root.minsize(900, 560)
+        self.root.geometry("1020x640")
+        self.root.minsize(920, 560)
 
         self.carnet: AddressBook = {}
         self.filtered: AddressBook | None = None
@@ -33,94 +33,84 @@ class CarnetApp:
         self._refresh_table()
 
     def _setup_style(self) -> None:
-        self.root.configure(bg="#0f172a")
+        self.root.configure(bg="#0b1220")
 
         style = ttk.Style()
         style.theme_use("clam")
 
-        style.configure("Title.TLabel", background="#0f172a", foreground="#e2e8f0", font=("Segoe UI", 18, "bold"))
-        style.configure("Subtitle.TLabel", background="#0f172a", foreground="#94a3b8", font=("Segoe UI", 10))
-        style.configure("Card.TFrame", background="#1e293b")
-        style.configure("CardTitle.TLabel", background="#1e293b", foreground="#f8fafc", font=("Segoe UI", 11, "bold"))
-        style.configure("CardText.TLabel", background="#1e293b", foreground="#cbd5e1", font=("Segoe UI", 10))
+        style.configure("App.TFrame", background="#0b1220")
+        style.configure("Panel.TFrame", background="#111b2f")
+
+        style.configure("Title.TLabel", background="#0b1220", foreground="#f8fafc", font=("Segoe UI", 20, "bold"))
+        style.configure("Subtitle.TLabel", background="#0b1220", foreground="#9ca3af", font=("Segoe UI", 10))
+
+        style.configure("PanelTitle.TLabel", background="#111b2f", foreground="#e5e7eb", font=("Segoe UI", 10, "bold"))
+        style.configure("PanelText.TLabel", background="#111b2f", foreground="#cbd5e1", font=("Segoe UI", 10))
 
         style.configure("Accent.TButton", font=("Segoe UI", 10, "bold"), padding=8)
-        style.configure("TButton", font=("Segoe UI", 10), padding=6)
+        style.configure("Action.TButton", font=("Segoe UI", 10), padding=7)
 
         style.configure(
             "Treeview",
             background="#f8fafc",
+            foreground="#0f172a",
             fieldbackground="#f8fafc",
             rowheight=30,
             font=("Segoe UI", 10),
         )
-        style.configure("Treeview.Heading", font=("Segoe UI", 10, "bold"))
+        style.map("Treeview", background=[("selected", "#bfdbfe")], foreground=[("selected", "#0f172a")])
+        style.configure("Treeview.Heading", font=("Segoe UI", 10, "bold"), background="#e2e8f0", foreground="#0f172a")
 
     def _build_ui(self) -> None:
-        container = ttk.Frame(self.root, padding=14)
+        container = ttk.Frame(self.root, padding=14, style="App.TFrame")
         container.pack(fill="both", expand=True)
 
         self._build_header(container)
-        self._build_form_card(container)
-        self._build_toolbar(container)
+        self._build_top_panel(container)
         self._build_table(container)
         self._build_status_bar(container)
 
     def _build_header(self, parent: ttk.Frame) -> None:
-        header = ttk.Frame(parent)
+        header = ttk.Frame(parent, style="App.TFrame")
         header.pack(fill="x", pady=(0, 12))
 
         ttk.Label(header, text="📒 Carnet d'adresses", style="Title.TLabel").pack(anchor="w")
         ttk.Label(
             header,
-            text="Ajoutez, recherchez et sauvegardez vos contacts en JSON/CSV.",
+            text="Interface plus propre : formulaires en popup, numéros séparés par espace, actions rapides.",
             style="Subtitle.TLabel",
         ).pack(anchor="w")
 
-    def _build_form_card(self, parent: ttk.Frame) -> None:
-        card = ttk.Frame(parent, style="Card.TFrame", padding=14)
-        card.pack(fill="x", pady=(0, 10))
+    def _build_top_panel(self, parent: ttk.Frame) -> None:
+        panel = ttk.Frame(parent, style="Panel.TFrame", padding=12)
+        panel.pack(fill="x", pady=(0, 10))
 
-        ttk.Label(card, text="Nouveau contact", style="CardTitle.TLabel").grid(row=0, column=0, columnspan=6, sticky="w")
-        ttk.Label(card, text="Nom", style="CardText.TLabel").grid(row=1, column=0, sticky="w", pady=(10, 4))
-        ttk.Label(card, text="Téléphones (séparés par ,)", style="CardText.TLabel").grid(row=1, column=2, sticky="w", pady=(10, 4))
-        ttk.Label(card, text="Email", style="CardText.TLabel").grid(row=1, column=4, sticky="w", pady=(10, 4))
+        ttk.Label(panel, text="Actions", style="PanelTitle.TLabel").grid(row=0, column=0, sticky="w", pady=(0, 8))
 
-        self.entry_nom = ttk.Entry(card, width=26)
-        self.entry_nom.grid(row=2, column=0, columnspan=2, sticky="ew", padx=(0, 8))
+        ttk.Button(panel, text="➕ Ajouter contact", style="Accent.TButton", command=self._open_add_contact_dialog).grid(
+            row=1, column=0, padx=(0, 6), pady=2
+        )
+        ttk.Button(panel, text="☎ Ajouter numéro", style="Action.TButton", command=self._ajouter_numero).grid(
+            row=1, column=1, padx=6, pady=2
+        )
+        ttk.Button(panel, text="🗑 Supprimer", style="Action.TButton", command=self._supprimer_contact).grid(
+            row=1, column=2, padx=6, pady=2
+        )
 
-        self.entry_telephones = ttk.Entry(card, width=34)
-        self.entry_telephones.grid(row=2, column=2, columnspan=2, sticky="ew", padx=(0, 8))
+        ttk.Separator(panel, orient="vertical").grid(row=1, column=3, sticky="ns", padx=12)
 
-        self.entry_email = ttk.Entry(card, width=34)
-        self.entry_email.grid(row=2, column=4, columnspan=2, sticky="ew")
+        ttk.Label(panel, text="Recherche préfixe", style="PanelText.TLabel").grid(row=1, column=4, padx=(0, 6))
+        self.entry_prefixe = ttk.Entry(panel, width=24)
+        self.entry_prefixe.grid(row=1, column=5, padx=(0, 6))
+        ttk.Button(panel, text="Rechercher", style="Action.TButton", command=self._rechercher).grid(row=1, column=6, padx=4)
+        ttk.Button(panel, text="Tout afficher", style="Action.TButton", command=self._reset_filter).grid(row=1, column=7, padx=4)
 
-        card.columnconfigure(0, weight=1)
-        card.columnconfigure(2, weight=1)
-        card.columnconfigure(4, weight=1)
+        ttk.Separator(panel, orient="vertical").grid(row=1, column=8, sticky="ns", padx=12)
 
-    def _build_toolbar(self, parent: ttk.Frame) -> None:
-        row = ttk.Frame(parent)
-        row.pack(fill="x", pady=(0, 10))
-
-        ttk.Button(row, text="Ajouter contact", style="Accent.TButton", command=self._ajouter_contact).pack(side="left", padx=(0, 6))
-        ttk.Button(row, text="Ajouter numéro", command=self._ajouter_numero).pack(side="left", padx=6)
-        ttk.Button(row, text="Supprimer", command=self._supprimer_contact).pack(side="left", padx=6)
-
-        ttk.Separator(row, orient="vertical").pack(side="left", fill="y", padx=10)
-
-        ttk.Label(row, text="Recherche préfixe:").pack(side="left")
-        self.entry_prefixe = ttk.Entry(row, width=24)
-        self.entry_prefixe.pack(side="left", padx=6)
-        ttk.Button(row, text="Rechercher", command=self._rechercher).pack(side="left", padx=4)
-        ttk.Button(row, text="Tout afficher", command=self._reset_filter).pack(side="left", padx=4)
-
-        ttk.Separator(row, orient="vertical").pack(side="left", fill="y", padx=10)
-
-        ttk.Button(row, text="Sauver JSON", command=self._save_json).pack(side="left", padx=4)
-        ttk.Button(row, text="Charger JSON", command=self._load_json).pack(side="left", padx=4)
-        ttk.Button(row, text="Sauver CSV", command=self._save_csv).pack(side="left", padx=4)
-        ttk.Button(row, text="Charger CSV", command=self._load_csv).pack(side="left", padx=4)
+        ttk.Button(panel, text="Sauver JSON", style="Action.TButton", command=self._save_json).grid(row=1, column=9, padx=4)
+        ttk.Button(panel, text="Charger JSON", style="Action.TButton", command=self._load_json).grid(row=1, column=10, padx=4)
+        ttk.Button(panel, text="Sauver CSV", style="Action.TButton", command=self._save_csv).grid(row=1, column=11, padx=4)
+        ttk.Button(panel, text="Charger CSV", style="Action.TButton", command=self._load_csv).grid(row=1, column=12, padx=4)
 
     def _build_table(self, parent: ttk.Frame) -> None:
         table_frame = ttk.Frame(parent)
@@ -131,9 +121,9 @@ class CarnetApp:
         self.tree.heading("nom", text="Nom")
         self.tree.heading("telephones", text="Téléphones")
         self.tree.heading("email", text="Email")
-        self.tree.column("nom", width=220, anchor="w")
-        self.tree.column("telephones", width=280, anchor="w")
-        self.tree.column("email", width=300, anchor="w")
+        self.tree.column("nom", width=230, anchor="w")
+        self.tree.column("telephones", width=320, anchor="w")
+        self.tree.column("email", width=340, anchor="w")
 
         scrollbar = ttk.Scrollbar(table_frame, orient="vertical", command=self.tree.yview)
         self.tree.configure(yscrollcommand=scrollbar.set)
@@ -143,15 +133,12 @@ class CarnetApp:
 
     def _build_status_bar(self, parent: ttk.Frame) -> None:
         self.status_var = tk.StringVar(value="Prêt")
-        bar = ttk.Frame(parent)
+        bar = ttk.Frame(parent, style="App.TFrame")
         bar.pack(fill="x", pady=(10, 0))
-        ttk.Label(bar, textvariable=self.status_var).pack(anchor="w")
+        ttk.Label(bar, textvariable=self.status_var, style="Subtitle.TLabel").pack(anchor="w")
 
     def _set_status(self, message: str) -> None:
         self.status_var.set(message)
-
-    def _get_phones_list(self) -> list[str]:
-        return [item.strip() for item in self.entry_telephones.get().split(",") if item.strip()]
 
     def _selected_name(self) -> str | None:
         selected = self.tree.selection()
@@ -169,33 +156,72 @@ class CarnetApp:
         source = self._current_view()
         for nom in sorted(source, key=lambda n: n.casefold()):
             telephones, email = source[nom]
-            self.tree.insert("", "end", values=(nom, ", ".join(telephones), email))
+            self.tree.insert("", "end", values=(nom, " ".join(telephones), email))
 
         self._set_status(f"{len(source)} contact(s) affiché(s)")
 
-    def _ajouter_contact(self) -> None:
-        nom = self.entry_nom.get()
-        telephones = self._get_phones_list()
-        email = self.entry_email.get()
+    def _parse_phone_input(self, raw: str) -> list[str]:
+        """Numéros séparés par espace, ex: '0611223344 0788990011'."""
+        return [item.strip() for item in raw.split() if item.strip()]
 
-        try:
-            if ajouter_contact(self.carnet, nom, telephones, email):
-                self.filtered = None
-                self._refresh_table()
-                self._set_status("✅ Contact ajouté")
-            else:
-                messagebox.showwarning("Doublon", "Un contact avec ce nom existe déjà.")
-        except ValueError as error:
-            messagebox.showerror("Erreur", str(error))
+    def _open_add_contact_dialog(self) -> None:
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Ajouter un contact")
+        dialog.transient(self.root)
+        dialog.grab_set()
+        dialog.geometry("460x220")
+        dialog.resizable(False, False)
+
+        frame = ttk.Frame(dialog, padding=14)
+        frame.pack(fill="both", expand=True)
+
+        ttk.Label(frame, text="Nom").grid(row=0, column=0, sticky="w", pady=(0, 4))
+        entry_nom = ttk.Entry(frame, width=48)
+        entry_nom.grid(row=1, column=0, sticky="ew", pady=(0, 8))
+
+        ttk.Label(frame, text="Téléphones (séparés par espace)").grid(row=2, column=0, sticky="w", pady=(0, 4))
+        entry_phones = ttk.Entry(frame, width=48)
+        entry_phones.grid(row=3, column=0, sticky="ew", pady=(0, 8))
+
+        ttk.Label(frame, text="Email").grid(row=4, column=0, sticky="w", pady=(0, 4))
+        entry_email = ttk.Entry(frame, width=48)
+        entry_email.grid(row=5, column=0, sticky="ew", pady=(0, 10))
+
+        def submit() -> None:
+            nom = entry_nom.get().strip()
+            telephones = self._parse_phone_input(entry_phones.get())
+            email = entry_email.get().strip()
+            try:
+                if ajouter_contact(self.carnet, nom, telephones, email):
+                    self.filtered = None
+                    self._refresh_table()
+                    self._set_status("✅ Contact ajouté")
+                    dialog.destroy()
+                else:
+                    messagebox.showwarning("Doublon", "Un contact avec ce nom existe déjà.", parent=dialog)
+            except ValueError as error:
+                messagebox.showerror("Erreur", str(error), parent=dialog)
+
+        actions = ttk.Frame(frame)
+        actions.grid(row=6, column=0, sticky="e")
+        ttk.Button(actions, text="Annuler", command=dialog.destroy).pack(side="left", padx=6)
+        ttk.Button(actions, text="Ajouter", style="Accent.TButton", command=submit).pack(side="left")
+
+        entry_nom.focus_set()
 
     def _ajouter_numero(self) -> None:
-        nom = self.entry_nom.get().strip() or self._selected_name()
+        nom = self._selected_name() or simpledialog.askstring("Contact", "Nom du contact:", parent=self.root)
         if not nom:
-            messagebox.showinfo("Information", "Sélectionnez un contact ou saisissez son nom.")
+            self._set_status("Ajout numéro annulé")
             return
 
-        numero = simpledialog.askstring("Nouveau numéro", "Numéro à ajouter:")
+        numero = simpledialog.askstring(
+            "Ajouter numéro",
+            "Nouveau numéro (un seul numéro, sans virgule):",
+            parent=self.root,
+        )
         if numero is None:
+            self._set_status("Ajout numéro annulé")
             return
 
         try:
@@ -203,20 +229,21 @@ class CarnetApp:
                 self._refresh_table()
                 self._set_status("✅ Numéro ajouté")
             else:
-                messagebox.showwarning("Information", "Contact introuvable ou numéro déjà présent.")
+                messagebox.showwarning("Information", "Contact introuvable ou numéro déjà présent.", parent=self.root)
         except ValueError as error:
-            messagebox.showerror("Erreur", str(error))
+            messagebox.showerror("Erreur", str(error), parent=self.root)
 
     def _supprimer_contact(self) -> None:
-        nom = self.entry_nom.get().strip() or self._selected_name()
+        nom = self._selected_name() or simpledialog.askstring("Supprimer", "Nom du contact à supprimer:", parent=self.root)
         if not nom:
-            messagebox.showinfo("Information", "Sélectionnez un contact ou saisissez son nom.")
+            self._set_status("Suppression annulée")
             return
 
         confirmation = messagebox.askyesno(
             "Confirmation",
             f"Voulez-vous vraiment supprimer le contact '{nom}' ?",
             icon="warning",
+            parent=self.root,
         )
         if not confirmation:
             self._set_status("Suppression annulée")
@@ -228,9 +255,9 @@ class CarnetApp:
                 self._refresh_table()
                 self._set_status("✅ Contact supprimé")
             else:
-                messagebox.showwarning("Information", "Contact introuvable.")
+                messagebox.showwarning("Information", "Contact introuvable.", parent=self.root)
         except ValueError as error:
-            messagebox.showerror("Erreur", str(error))
+            messagebox.showerror("Erreur", str(error), parent=self.root)
 
     def _rechercher(self) -> None:
         prefixe = self.entry_prefixe.get().strip()
