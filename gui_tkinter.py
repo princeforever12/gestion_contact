@@ -213,6 +213,15 @@ class CarnetApp:
             messagebox.showinfo("Information", "Sélectionnez un contact ou saisissez son nom.")
             return
 
+        confirmation = messagebox.askyesno(
+            "Confirmation",
+            f"Voulez-vous vraiment supprimer le contact '{nom}' ?",
+            icon="warning",
+        )
+        if not confirmation:
+            self._set_status("Suppression annulée")
+            return
+
         try:
             if supprimer_contact(self.carnet, nom):
                 self.filtered = None

@@ -233,6 +233,11 @@ def executer_application() -> None:
 
             elif choix == "3":
                 nom = input("Nom à supprimer: ")
+                confirmer = input(f"Voulez-vous vraiment supprimer '{nom.strip()}' ? (o/n): ").strip().lower()
+                if confirmer not in {"o", "oui", "y", "yes"}:
+                    _print_info("Suppression annulée.")
+                else:
+                    _print_info("✅ Contact supprimé." if supprimer_contact(carnet, nom) else "⚠️ Contact introuvable.")
                 _print_info("✅ Contact supprimé." if supprimer_contact(carnet, nom) else "⚠️ Contact introuvable.")
 
             elif choix == "4":

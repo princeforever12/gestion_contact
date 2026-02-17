@@ -129,6 +129,7 @@ Nouvelle interface visuelle :
 - sélection directe dans la liste pour supprimer/ajouter un numéro
 - barre d'actions claire (recherche, sauvegarde/chargement)
 - barre de statut en bas pour feedback rapide
+- confirmation avant suppression (sécurité UX)
 Fonctionnalités GUI :
 - formulaire pour ajouter contact
 - ajout d'un numéro à un contact
