@@ -238,6 +238,7 @@ def executer_application() -> None:
                     _print_info("Suppression annulée.")
                 else:
                     _print_info("✅ Contact supprimé." if supprimer_contact(carnet, nom) else "⚠️ Contact introuvable.")
+                _print_info("✅ Contact supprimé." if supprimer_contact(carnet, nom) else "⚠️ Contact introuvable.")
 
             elif choix == "4":
                 nom = input("Nom à rechercher: ")
