@@ -77,7 +77,7 @@ class CarnetApp:
         ttk.Label(header, text="📒 Carnet d'adresses", style="Title.TLabel").pack(anchor="w")
         ttk.Label(
             header,
-            text="Interface plus propre : formulaires en popup, numéros séparés par espace, actions rapides.",
+            text="Gérez vos contacts rapidement : ajout, recherche et sauvegarde en un clic.",
             style="Subtitle.TLabel",
         ).pack(anchor="w")
 
@@ -107,10 +107,12 @@ class CarnetApp:
 
         ttk.Separator(panel, orient="vertical").grid(row=1, column=8, sticky="ns", padx=12)
 
-        ttk.Button(panel, text="Sauver JSON", style="Action.TButton", command=self._save_json).grid(row=1, column=9, padx=4)
-        ttk.Button(panel, text="Charger JSON", style="Action.TButton", command=self._load_json).grid(row=1, column=10, padx=4)
-        ttk.Button(panel, text="Sauver CSV", style="Action.TButton", command=self._save_csv).grid(row=1, column=11, padx=4)
-        ttk.Button(panel, text="Charger CSV", style="Action.TButton", command=self._load_csv).grid(row=1, column=12, padx=4)
+        io_frame = ttk.Frame(panel, style="Panel.TFrame")
+        io_frame.grid(row=1, column=9, columnspan=4, sticky="w")
+        ttk.Button(io_frame, text="Sauver JSON", style="Action.TButton", command=self._save_json).grid(row=0, column=0, padx=3, pady=2)
+        ttk.Button(io_frame, text="Charger JSON", style="Action.TButton", command=self._load_json).grid(row=0, column=1, padx=3, pady=2)
+        ttk.Button(io_frame, text="Sauver CSV", style="Action.TButton", command=self._save_csv).grid(row=1, column=0, padx=3, pady=2)
+        ttk.Button(io_frame, text="Charger CSV", style="Action.TButton", command=self._load_csv).grid(row=1, column=1, padx=3, pady=2)
 
     def _build_table(self, parent: ttk.Frame) -> None:
         table_frame = ttk.Frame(parent)
